@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:batch="http://www.mulesoft.org/schema/mule/batch" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/batch http://www.mulesoft.org/schema/mule/batch/current/mule-batch.xsd">
+	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="c3cd5857-2e22-4187-9332-eeed1de86d6e" >
+		<http:listener-connection host="0.0.0.0" port="8081" />
+	</http:listener-config>
+	<flow name="batchprocessingFlow" doc:id="bde57f04-0f91-43ea-a957-6b32dab2632b" >
+		<http:listener doc:name="Listener" doc:id="cfa64329-caf4-4a4d-984c-9c319d1038a9" config-ref="HTTP_Listener_config" path="batch"/>
+		<logger level="INFO" doc:name="Logger" doc:id="34610fae-4eb5-42aa-8d72-4ca6914d5def" message="------flow started--------"/>
+		<set-payload value="#[payload]" doc:name="Set Payload" doc:id="7bfc804b-dd56-4236-8dc9-51ca2ae945f6" />
+		<batch:job jobName="batchprocessingBatch_Job" doc:id="25c87648-732a-4ec5-89ab-5ff5db20b280" >
+			<batch:process-records >
+				<batch:step name="Batch_Step" doc:id="b3c46f6b-7d7c-4f8a-bef7-d9afd93a0fb5" >
+					<logger level="INFO" doc:name="Logger" doc:id="5cfb6f90-263e-4995-a3c8-0f9ace4f7e91" />
+					<ee:transform doc:name="Transform Message" doc:id="6afaadf2-82b4-4c5a-ba2b-2da3b61ac195" >
+						<ee:message >
+							<ee:set-payload ><![CDATA[%dw 2.0
+output application/java
+---
+{
+}]]></ee:set-payload>
+						</ee:message>
+					</ee:transform>
+				</batch:step>
+			</batch:process-records>
+			<batch:on-complete >
+				<logger level="INFO" doc:name="Logger" doc:id="b7e9fcd8-256a-455a-b8b9-035d5b78e540" />
+			</batch:on-complete>
+		</batch:job>
+		<logger level="INFO" doc:name="Logger" doc:id="ac10e8a6-0f21-495b-86ef-eef90e35c1dd" message="-----flow ended------"/>
+		<ee:transform doc:name="Transform Message" doc:id="cb606f68-d870-4d14-bcf8-4d83666e972d">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/java
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+</mule>
